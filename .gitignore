@@ -1,0 +1,25 @@
+@"
+# GeoIP databases
+*.mmdb
+db/*.mmdb
+
+# Go build artifacts
+bin/
+dist/
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+"@ | Out-File -Encoding utf8 .gitignore

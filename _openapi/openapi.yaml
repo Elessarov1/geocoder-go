@@ -1,0 +1,371 @@
+openapi: 3.1.0
+info:
+  title: GeoCoder Controller API
+  version: "1.0"
+servers:
+  - url: http://localhost:8096
+    description: Local
+
+tags:
+  - name: geo-controller
+    description: Geo endpoints
+
+paths:
+  /v1/health:
+    get:
+      tags: [ system ]
+      summary: Get service health
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service health returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /geo/ip_data:
+    post:
+      tags: [geo-controller]
+      summary: Получение кодов стран по перечню ip адресов
+      operationId: getIpData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GeoPayload"
+            examples:
+              sample:
+                value:
+                  ips:
+                    - ip: "8.8.8.8"
+                    - ip: "2001:4860:4860::8888"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeoIpData"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        default:
+          $ref: "#/components/responses/DefaultError"
+
+  /geo/networks:
+    get:
+      tags: [geo-controller]
+      summary: Получение полного перечня подсетей по коду страны
+      operationId: getCountryNetworks
+      parameters:
+        - name: isoCodes
+          in: query
+          required: true
+          description: Список ISO2 кодов стран (уникальные)
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/IsoCode"
+            uniqueItems: true
+          examples:
+            two:
+              value: ["RU", "US"]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IsoCodeNetworks"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        default:
+          $ref: "#/components/responses/DefaultError"
+
+  /geo/networks/paged:
+    get:
+      tags: [geo-controller]
+      summary: Получение перечня подсетей по коду страны постранично
+      operationId: getCountryNetworksPaged
+      parameters:
+        - name: isoCode
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/IsoCode"
+          example: "RU"
+        - name: page
+          in: query
+          required: true
+          description: Номер страницы (0..)
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+          example: 0
+        - name: size
+          in: query
+          required: true
+          description: Размер страницы
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100000
+          example: 1000
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageDataString"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        default:
+          $ref: "#/components/responses/DefaultError"
+
+  /geo/countries:
+    get:
+      tags: [geo-controller]
+      summary: Получение полного перечня кодов стран
+      operationId: getCountries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CountryRangeData"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        default:
+          $ref: "#/components/responses/DefaultError"
+
+components:
+  responses:
+    DefaultError:
+      description: Default error response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            invalid:
+              value:
+                result: "ERROR"
+                content: null
+                error:
+                  code: "common.bad_request"
+                  description: "invalid request payload"
+
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            not_found:
+              value:
+                result: "ERROR"
+                content: null
+                error:
+                  code: "common.not_found"
+                  description: "resource not found"
+
+    InternalError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            internal:
+              value:
+                result: "ERROR"
+                content: null
+                error:
+                  code: "common.error"
+                  description: "internal error"
+
+  schemas:
+    Health:
+      description: Service health status
+      type: object
+      required: [ uptime, version ]
+      properties:
+        uptime:
+          type: integer
+          description: Service uptime (seconds)
+          example: 31337
+        version:
+          type: string
+          description: Service version
+          example: 0.0.0
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        result:
+          type: string
+          description: Result of the request execution (e.g., "ERROR" in case of failure)
+          example: "ERROR"
+        content:
+          type: object
+          description: Response data (null in case of an error)
+          nullable: true
+        error:
+          type: object
+          additionalProperties: false
+          properties:
+            code:
+              type: string
+              description: Error code
+              example: "common.error"
+            description:
+              type: string
+              description: Error description
+              example: "empty user info provided"
+          required: [code, description]
+      required: [result, error]
+
+    IsoCode:
+      type: string
+      minLength: 2
+      maxLength: 2
+      pattern: "^[A-Z]{2}$"
+      description: ISO 3166-1 alpha-2 (ZZ = unknown)
+      examples: ["RU", "US", "ZZ"]
+
+    IpAddress:
+      type: string
+      description: IPv4 or IPv6 address
+      examples: [ "8.8.8.8", "2001:4860:4860::8888" ]
+
+    Cidr:
+      type: string
+      description: CIDR notation
+      examples: ["1.2.3.0/24", "2001:db8::/32"]
+
+    GeoPayload:
+      type: object
+      additionalProperties: false
+      properties:
+        ips:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/IpPayload"
+      required: [ips]
+
+    IpPayload:
+      type: object
+      additionalProperties: false
+      properties:
+        ip:
+          $ref: "#/components/schemas/IpAddress"
+      required: [ip]
+
+    GeoIpData:
+      type: object
+      additionalProperties: false
+      properties:
+        ip:
+          $ref: "#/components/schemas/IpAddress"
+        code:
+          $ref: "#/components/schemas/IsoCode"
+        countryName:
+          type: string
+          nullable: true
+          description: Optional (если появится источник имени страны)
+      required: [ip, code]
+
+    IsoCodeNetworks:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          $ref: "#/components/schemas/IsoCode"
+        networks:
+          type: array
+          items:
+            $ref: "#/components/schemas/Cidr"
+          uniqueItems: true
+      required: [code, networks]
+
+    PageDataString:
+      type: object
+      additionalProperties: false
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Cidr"
+        totalElements:
+          type: integer
+          format: int64
+          minimum: 0
+        totalPages:
+          type: integer
+          format: int64
+          minimum: 0
+        size:
+          type: integer
+          format: int64
+          minimum: 1
+        page:
+          type: integer
+          format: int64
+          minimum: 0
+      required: [content, totalElements, totalPages, size, page]
+
+    CountryRangeData:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          $ref: "#/components/schemas/IsoCode"
+        rangesCount:
+          type: integer
+          format: int32
+          minimum: 0
+      required: [code, rangesCount]
