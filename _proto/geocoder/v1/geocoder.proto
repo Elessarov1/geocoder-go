@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package geocoder.v1;
+
+option go_package = "github.com/Elessarov1/geocoder-go/internal/grpc/gen/geocoderv1;geocoderv1";
+
+import "google/protobuf/empty.proto";
+
+message Health {
+  int32 uptime_seconds = 1;
+  string version = 2;
+}
+
+message CountryRangeData {
+  string code = 1;
+  int32 ranges_count = 2;
+}
+
+message GetCountriesResponse {
+  repeated CountryRangeData countries = 1;
+}
+
+message IpPayload {
+  string ip = 1;
+}
+
+message GeoIpData {
+  string ip = 1;
+  string code = 2;
+  string country_name = 3;
+}
+
+message GetIpDataRequest {
+  repeated IpPayload ips = 1;
+}
+
+message GetIpDataResponse {
+  repeated GeoIpData items = 1;
+}
+
+message IsoCodeNetworks {
+  string code = 1;
+  repeated string networks = 2; // "1.2.3.0/24"
+}
+
+message GetCountryNetworksRequest {
+  repeated string iso_codes = 1; // ["RU","US"]
+}
+
+message GetCountryNetworksResponse {
+  repeated IsoCodeNetworks items = 1;
+}
+
+message PageDataString {
+  repeated string content = 1;
+  int64 total_elements = 2;
+  int64 total_pages = 3;
+  int64 page = 4;
+  int64 size = 5;
+}
+
+message GetCountryNetworksPagedRequest {
+  string iso_code = 1;
+  int32 page = 2;
+  int32 size = 3;
+}
+
+service GeocoderService {
+  rpc GetHealth(google.protobuf.Empty) returns (Health);
+
+  rpc GetCountries(google.protobuf.Empty) returns (GetCountriesResponse);
+  rpc GetIpData(GetIpDataRequest) returns (GetIpDataResponse);
+
+  rpc GetCountryNetworks(GetCountryNetworksRequest) returns (GetCountryNetworksResponse);
+  rpc GetCountryNetworksPaged(GetCountryNetworksPagedRequest) returns (PageDataString);
+}

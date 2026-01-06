@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"Geocoder/internal/common/logger"
+	"github.com/Elessarov1/geocoder-go/internal/common/logger"
 	"net"
 	"net/http"
 	"strings"

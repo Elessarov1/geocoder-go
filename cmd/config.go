@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"Geocoder/internal/common/logger"
-	"Geocoder/internal/config"
 	"context"
 	"fmt"
+
+	"github.com/Elessarov1/geocoder-go/internal/common/logger"
+	"github.com/Elessarov1/geocoder-go/internal/config"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/creasty/defaults"

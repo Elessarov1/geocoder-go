@@ -1,21 +1,20 @@
 package server
 
 import (
-	"Geocoder"
-	"Geocoder/internal/common/logger"
-	"Geocoder/internal/config"
-	"Geocoder/internal/geoip"
-	"Geocoder/internal/server/middleware"
-	"Geocoder/internal/server/oas"
 	"context"
 	"fmt"
+	"github.com/Elessarov1/geocoder-go"
+	"github.com/Elessarov1/geocoder-go/internal/common/logger"
+	"github.com/Elessarov1/geocoder-go/internal/config"
+	"github.com/Elessarov1/geocoder-go/internal/geocoder_api"
+	"github.com/Elessarov1/geocoder-go/internal/server/middleware"
+	"github.com/Elessarov1/geocoder-go/internal/server/oas"
 	"io/fs"
 	"net"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/oschwald/maxminddb-golang"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 )
@@ -29,25 +28,18 @@ type GeoCoderServer struct {
 	server    *http.Server
 	lg        *zap.Logger
 
-	geo  *geoip.Store
-	mmdb *maxminddb.Reader
+	api geocoder_api.API
 }
 
 var _ oas.Handler = (*GeoCoderServer)(nil) // static check
 
-func NewServer(ctx context.Context, cfg *config.ServerConfig, geo *geoip.Store, mmdbPath string) (*GeoCoderServer, error) {
+func NewServer(ctx context.Context, cfg *config.ServerConfig, api *geocoder_api.Service) (*GeoCoderServer, error) {
 	lg := logger.FromContext(ctx).Named("server")
-
-	db, err := maxminddb.Open(mmdbPath)
-	if err != nil {
-		return nil, fmt.Errorf("open mmdb for ip lookup: %w", err)
-	}
 
 	s := &GeoCoderServer{
 		lg:        lg,
 		startTime: time.Now(),
-		geo:       geo,
-		mmdb:      db,
+		api:       api,
 	}
 
 	// OpenAPI handler (ogen-generated)
@@ -113,7 +105,6 @@ func (s *GeoCoderServer) ListenAndServe(ctx context.Context) error {
 }
 
 func (s *GeoCoderServer) Close() {
-	_ = s.mmdb.Close()
 	_ = s.server.Close()
 	s.lg.Info("HTTP server closed")
 }

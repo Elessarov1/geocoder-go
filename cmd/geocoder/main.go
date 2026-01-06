@@ -1,12 +1,13 @@
 package main
 
 import (
-	"Geocoder/cmd/start"
-	"Geocoder/internal/common/version"
 	"context"
 	"fmt"
 	"os"
 	"os/signal"
+
+	"github.com/Elessarov1/geocoder-go/cmd/start"
+	"github.com/Elessarov1/geocoder-go/internal/common/version"
 
 	"github.com/urfave/cli/v3"
 )

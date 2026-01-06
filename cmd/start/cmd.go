@@ -1,18 +1,23 @@
 package start
 
 import (
-	"Geocoder/cmd"
-	"Geocoder/internal/common/logger"
-	"Geocoder/internal/config"
-	"Geocoder/internal/geoip"
-	"Geocoder/internal/server"
 	"context"
 	"fmt"
 	"os/signal"
 	"runtime"
 	"syscall"
+	"time"
+
+	"github.com/Elessarov1/geocoder-go/cmd"
+	"github.com/Elessarov1/geocoder-go/internal/common/logger"
+	"github.com/Elessarov1/geocoder-go/internal/config"
+	"github.com/Elessarov1/geocoder-go/internal/geocoder_api"
+	"github.com/Elessarov1/geocoder-go/internal/geoip"
+	grpc_server "github.com/Elessarov1/geocoder-go/internal/gprc_server"
+	"github.com/Elessarov1/geocoder-go/internal/server"
 
 	"github.com/go-faster/errors"
+	"github.com/oschwald/maxminddb-golang"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
@@ -77,15 +82,31 @@ func (app *App) action(ctx context.Context, _ *cli.Command) error {
 	//runtime.GC()
 	//logMem(log, "mem_after_load_after_gc")
 
-	// create http server
-	srv, err := server.NewServer(ctx, &cfg.Server, app.geoip, cfg.GeoCoder.GeoIPDbPath)
+	mmdb, err := maxminddb.Open(cfg.GeoCoder.GeoIPDbPath)
+	if err != nil {
+		return fmt.Errorf("open mmdb: %w", err)
+	}
+	defer mmdb.Close()
+
+	api := geocoder_api.NewService(store, mmdb, time.Now())
+
+	srv, err := server.NewServer(ctx, &cfg.Server, api)
 	if err != nil {
 		return fmt.Errorf("failed to create geocoder http server: %w", err)
 	}
+	defer srv.Close()
+
+	grpcSrv, err := grpc_server.New(ctx, &cfg.GRPC, api)
+	if err != nil {
+		return fmt.Errorf("failed to create geocoder grpc server: %w", err)
+	}
+	defer grpcSrv.Close()
+
 	app.httpServer = srv
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return srv.ListenAndServe(ctx) })
+	g.Go(func() error { return grpcSrv.Serve(ctx) })
 
 	g.Go(func() error {
 		<-ctx.Done()
@@ -99,7 +120,6 @@ func (app *App) action(ctx context.Context, _ *cli.Command) error {
 		}
 	}
 
-	srv.Close()
 	log.Info("Shutdown complete")
 	return nil
 }
