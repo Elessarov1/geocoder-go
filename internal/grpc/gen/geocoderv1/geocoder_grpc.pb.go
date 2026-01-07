@@ -20,11 +20,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GeocoderService_GetHealth_FullMethodName               = "/geocoder.v1.GeocoderService/GetHealth"
-	GeocoderService_GetCountries_FullMethodName            = "/geocoder.v1.GeocoderService/GetCountries"
-	GeocoderService_GetIpData_FullMethodName               = "/geocoder.v1.GeocoderService/GetIpData"
-	GeocoderService_GetCountryNetworks_FullMethodName      = "/geocoder.v1.GeocoderService/GetCountryNetworks"
-	GeocoderService_GetCountryNetworksPaged_FullMethodName = "/geocoder.v1.GeocoderService/GetCountryNetworksPaged"
+	GeocoderService_GetHealth_FullMethodName                = "/geocoder.v1.GeocoderService/GetHealth"
+	GeocoderService_GetCountries_FullMethodName             = "/geocoder.v1.GeocoderService/GetCountries"
+	GeocoderService_GetIpData_FullMethodName                = "/geocoder.v1.GeocoderService/GetIpData"
+	GeocoderService_GetCountryNetworks_FullMethodName       = "/geocoder.v1.GeocoderService/GetCountryNetworks"
+	GeocoderService_GetCountryNetworksPaged_FullMethodName  = "/geocoder.v1.GeocoderService/GetCountryNetworksPaged"
+	GeocoderService_GetCountryNetworksStream_FullMethodName = "/geocoder.v1.GeocoderService/GetCountryNetworksStream"
 )
 
 // GeocoderServiceClient is the client API for GeocoderService service.
@@ -36,6 +37,7 @@ type GeocoderServiceClient interface {
 	GetIpData(ctx context.Context, in *GetIpDataRequest, opts ...grpc.CallOption) (*GetIpDataResponse, error)
 	GetCountryNetworks(ctx context.Context, in *GetCountryNetworksRequest, opts ...grpc.CallOption) (*GetCountryNetworksResponse, error)
 	GetCountryNetworksPaged(ctx context.Context, in *GetCountryNetworksPagedRequest, opts ...grpc.CallOption) (*PageDataString, error)
+	GetCountryNetworksStream(ctx context.Context, in *GetCountryNetworksStreamRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[CountryNetworksChunk], error)
 }
 
 type geocoderServiceClient struct {
@@ -96,6 +98,25 @@ func (c *geocoderServiceClient) GetCountryNetworksPaged(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *geocoderServiceClient) GetCountryNetworksStream(ctx context.Context, in *GetCountryNetworksStreamRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[CountryNetworksChunk], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &GeocoderService_ServiceDesc.Streams[0], GeocoderService_GetCountryNetworksStream_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[GetCountryNetworksStreamRequest, CountryNetworksChunk]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type GeocoderService_GetCountryNetworksStreamClient = grpc.ServerStreamingClient[CountryNetworksChunk]
+
 // GeocoderServiceServer is the server API for GeocoderService service.
 // All implementations must embed UnimplementedGeocoderServiceServer
 // for forward compatibility.
@@ -105,6 +126,7 @@ type GeocoderServiceServer interface {
 	GetIpData(context.Context, *GetIpDataRequest) (*GetIpDataResponse, error)
 	GetCountryNetworks(context.Context, *GetCountryNetworksRequest) (*GetCountryNetworksResponse, error)
 	GetCountryNetworksPaged(context.Context, *GetCountryNetworksPagedRequest) (*PageDataString, error)
+	GetCountryNetworksStream(*GetCountryNetworksStreamRequest, grpc.ServerStreamingServer[CountryNetworksChunk]) error
 	mustEmbedUnimplementedGeocoderServiceServer()
 }
 
@@ -129,6 +151,9 @@ func (UnimplementedGeocoderServiceServer) GetCountryNetworks(context.Context, *G
 }
 func (UnimplementedGeocoderServiceServer) GetCountryNetworksPaged(context.Context, *GetCountryNetworksPagedRequest) (*PageDataString, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCountryNetworksPaged not implemented")
+}
+func (UnimplementedGeocoderServiceServer) GetCountryNetworksStream(*GetCountryNetworksStreamRequest, grpc.ServerStreamingServer[CountryNetworksChunk]) error {
+	return status.Error(codes.Unimplemented, "method GetCountryNetworksStream not implemented")
 }
 func (UnimplementedGeocoderServiceServer) mustEmbedUnimplementedGeocoderServiceServer() {}
 func (UnimplementedGeocoderServiceServer) testEmbeddedByValue()                         {}
@@ -241,6 +266,17 @@ func _GeocoderService_GetCountryNetworksPaged_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GeocoderService_GetCountryNetworksStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetCountryNetworksStreamRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(GeocoderServiceServer).GetCountryNetworksStream(m, &grpc.GenericServerStream[GetCountryNetworksStreamRequest, CountryNetworksChunk]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type GeocoderService_GetCountryNetworksStreamServer = grpc.ServerStreamingServer[CountryNetworksChunk]
+
 // GeocoderService_ServiceDesc is the grpc.ServiceDesc for GeocoderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -269,6 +305,12 @@ var GeocoderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _GeocoderService_GetCountryNetworksPaged_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetCountryNetworksStream",
+			Handler:       _GeocoderService_GetCountryNetworksStream_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "geocoder/v1/geocoder.proto",
 }

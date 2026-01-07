@@ -65,6 +65,19 @@ message GetCountryNetworksPagedRequest {
   int32 size = 3;
 }
 
+message GetCountryNetworksStreamRequest {
+  repeated string iso_codes = 1; // ["RU","US"]
+  int32 chunk_size = 2;          // how many CIDR per message
+}
+
+message CountryNetworksChunk {
+  string code = 1;               // ISO2
+  repeated string networks = 2;  // CIDR
+  int32 page = 3;                // 0.. (chunk number)
+  int32 total_pages = 4;         // chunks count
+  bool last = 5;                 // last chunk fo country
+}
+
 service GeocoderService {
   rpc GetHealth(google.protobuf.Empty) returns (Health);
 
@@ -73,4 +86,6 @@ service GeocoderService {
 
   rpc GetCountryNetworks(GetCountryNetworksRequest) returns (GetCountryNetworksResponse);
   rpc GetCountryNetworksPaged(GetCountryNetworksPagedRequest) returns (PageDataString);
+
+  rpc GetCountryNetworksStream(GetCountryNetworksStreamRequest) returns (stream CountryNetworksChunk);
 }

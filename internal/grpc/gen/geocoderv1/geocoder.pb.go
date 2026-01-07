@@ -638,6 +638,134 @@ func (x *GetCountryNetworksPagedRequest) GetSize() int32 {
 	return 0
 }
 
+type GetCountryNetworksStreamRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsoCodes      []string               `protobuf:"bytes,1,rep,name=iso_codes,json=isoCodes,proto3" json:"iso_codes,omitempty"`     // ["RU","US"]
+	ChunkSize     int32                  `protobuf:"varint,2,opt,name=chunk_size,json=chunkSize,proto3" json:"chunk_size,omitempty"` // how many CIDR per message
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCountryNetworksStreamRequest) Reset() {
+	*x = GetCountryNetworksStreamRequest{}
+	mi := &file_geocoder_v1_geocoder_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCountryNetworksStreamRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCountryNetworksStreamRequest) ProtoMessage() {}
+
+func (x *GetCountryNetworksStreamRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_geocoder_v1_geocoder_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCountryNetworksStreamRequest.ProtoReflect.Descriptor instead.
+func (*GetCountryNetworksStreamRequest) Descriptor() ([]byte, []int) {
+	return file_geocoder_v1_geocoder_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GetCountryNetworksStreamRequest) GetIsoCodes() []string {
+	if x != nil {
+		return x.IsoCodes
+	}
+	return nil
+}
+
+func (x *GetCountryNetworksStreamRequest) GetChunkSize() int32 {
+	if x != nil {
+		return x.ChunkSize
+	}
+	return 0
+}
+
+type CountryNetworksChunk struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`                                // ISO2
+	Networks      []string               `protobuf:"bytes,2,rep,name=networks,proto3" json:"networks,omitempty"`                        // CIDR
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`                               // 0.. (chunk number)
+	TotalPages    int32                  `protobuf:"varint,4,opt,name=total_pages,json=totalPages,proto3" json:"total_pages,omitempty"` // chunks count
+	Last          bool                   `protobuf:"varint,5,opt,name=last,proto3" json:"last,omitempty"`                               // last chunk fo country
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CountryNetworksChunk) Reset() {
+	*x = CountryNetworksChunk{}
+	mi := &file_geocoder_v1_geocoder_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CountryNetworksChunk) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CountryNetworksChunk) ProtoMessage() {}
+
+func (x *CountryNetworksChunk) ProtoReflect() protoreflect.Message {
+	mi := &file_geocoder_v1_geocoder_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CountryNetworksChunk.ProtoReflect.Descriptor instead.
+func (*CountryNetworksChunk) Descriptor() ([]byte, []int) {
+	return file_geocoder_v1_geocoder_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *CountryNetworksChunk) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *CountryNetworksChunk) GetNetworks() []string {
+	if x != nil {
+		return x.Networks
+	}
+	return nil
+}
+
+func (x *CountryNetworksChunk) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *CountryNetworksChunk) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
+	}
+	return 0
+}
+
+func (x *CountryNetworksChunk) GetLast() bool {
+	if x != nil {
+		return x.Last
+	}
+	return false
+}
+
 var File_geocoder_v1_geocoder_proto protoreflect.FileDescriptor
 
 const file_geocoder_v1_geocoder_proto_rawDesc = "" +
@@ -678,13 +806,25 @@ const file_geocoder_v1_geocoder_proto_rawDesc = "" +
 	"\x1eGetCountryNetworksPagedRequest\x12\x19\n" +
 	"\biso_code\x18\x01 \x01(\tR\aisoCode\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x12\n" +
-	"\x04size\x18\x03 \x01(\x05R\x04size2\xae\x03\n" +
+	"\x04size\x18\x03 \x01(\x05R\x04size\"]\n" +
+	"\x1fGetCountryNetworksStreamRequest\x12\x1b\n" +
+	"\tiso_codes\x18\x01 \x03(\tR\bisoCodes\x12\x1d\n" +
+	"\n" +
+	"chunk_size\x18\x02 \x01(\x05R\tchunkSize\"\x8f\x01\n" +
+	"\x14CountryNetworksChunk\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\tR\x04code\x12\x1a\n" +
+	"\bnetworks\x18\x02 \x03(\tR\bnetworks\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1f\n" +
+	"\vtotal_pages\x18\x04 \x01(\x05R\n" +
+	"totalPages\x12\x12\n" +
+	"\x04last\x18\x05 \x01(\bR\x04last2\x9d\x04\n" +
 	"\x0fGeocoderService\x128\n" +
 	"\tGetHealth\x12\x16.google.protobuf.Empty\x1a\x13.geocoder.v1.Health\x12I\n" +
 	"\fGetCountries\x12\x16.google.protobuf.Empty\x1a!.geocoder.v1.GetCountriesResponse\x12J\n" +
 	"\tGetIpData\x12\x1d.geocoder.v1.GetIpDataRequest\x1a\x1e.geocoder.v1.GetIpDataResponse\x12e\n" +
 	"\x12GetCountryNetworks\x12&.geocoder.v1.GetCountryNetworksRequest\x1a'.geocoder.v1.GetCountryNetworksResponse\x12c\n" +
-	"\x17GetCountryNetworksPaged\x12+.geocoder.v1.GetCountryNetworksPagedRequest\x1a\x1b.geocoder.v1.PageDataStringBKZIgithub.com/Elessarov1/geocoder-go/internal/grpc/gen/geocoderv1;geocoderv1b\x06proto3"
+	"\x17GetCountryNetworksPaged\x12+.geocoder.v1.GetCountryNetworksPagedRequest\x1a\x1b.geocoder.v1.PageDataString\x12m\n" +
+	"\x18GetCountryNetworksStream\x12,.geocoder.v1.GetCountryNetworksStreamRequest\x1a!.geocoder.v1.CountryNetworksChunk0\x01BKZIgithub.com/Elessarov1/geocoder-go/internal/grpc/gen/geocoderv1;geocoderv1b\x06proto3"
 
 var (
 	file_geocoder_v1_geocoder_proto_rawDescOnce sync.Once
@@ -698,39 +838,43 @@ func file_geocoder_v1_geocoder_proto_rawDescGZIP() []byte {
 	return file_geocoder_v1_geocoder_proto_rawDescData
 }
 
-var file_geocoder_v1_geocoder_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_geocoder_v1_geocoder_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_geocoder_v1_geocoder_proto_goTypes = []any{
-	(*Health)(nil),                         // 0: geocoder.v1.Health
-	(*CountryRangeData)(nil),               // 1: geocoder.v1.CountryRangeData
-	(*GetCountriesResponse)(nil),           // 2: geocoder.v1.GetCountriesResponse
-	(*IpPayload)(nil),                      // 3: geocoder.v1.IpPayload
-	(*GeoIpData)(nil),                      // 4: geocoder.v1.GeoIpData
-	(*GetIpDataRequest)(nil),               // 5: geocoder.v1.GetIpDataRequest
-	(*GetIpDataResponse)(nil),              // 6: geocoder.v1.GetIpDataResponse
-	(*IsoCodeNetworks)(nil),                // 7: geocoder.v1.IsoCodeNetworks
-	(*GetCountryNetworksRequest)(nil),      // 8: geocoder.v1.GetCountryNetworksRequest
-	(*GetCountryNetworksResponse)(nil),     // 9: geocoder.v1.GetCountryNetworksResponse
-	(*PageDataString)(nil),                 // 10: geocoder.v1.PageDataString
-	(*GetCountryNetworksPagedRequest)(nil), // 11: geocoder.v1.GetCountryNetworksPagedRequest
-	(*emptypb.Empty)(nil),                  // 12: google.protobuf.Empty
+	(*Health)(nil),                          // 0: geocoder.v1.Health
+	(*CountryRangeData)(nil),                // 1: geocoder.v1.CountryRangeData
+	(*GetCountriesResponse)(nil),            // 2: geocoder.v1.GetCountriesResponse
+	(*IpPayload)(nil),                       // 3: geocoder.v1.IpPayload
+	(*GeoIpData)(nil),                       // 4: geocoder.v1.GeoIpData
+	(*GetIpDataRequest)(nil),                // 5: geocoder.v1.GetIpDataRequest
+	(*GetIpDataResponse)(nil),               // 6: geocoder.v1.GetIpDataResponse
+	(*IsoCodeNetworks)(nil),                 // 7: geocoder.v1.IsoCodeNetworks
+	(*GetCountryNetworksRequest)(nil),       // 8: geocoder.v1.GetCountryNetworksRequest
+	(*GetCountryNetworksResponse)(nil),      // 9: geocoder.v1.GetCountryNetworksResponse
+	(*PageDataString)(nil),                  // 10: geocoder.v1.PageDataString
+	(*GetCountryNetworksPagedRequest)(nil),  // 11: geocoder.v1.GetCountryNetworksPagedRequest
+	(*GetCountryNetworksStreamRequest)(nil), // 12: geocoder.v1.GetCountryNetworksStreamRequest
+	(*CountryNetworksChunk)(nil),            // 13: geocoder.v1.CountryNetworksChunk
+	(*emptypb.Empty)(nil),                   // 14: google.protobuf.Empty
 }
 var file_geocoder_v1_geocoder_proto_depIdxs = []int32{
 	1,  // 0: geocoder.v1.GetCountriesResponse.countries:type_name -> geocoder.v1.CountryRangeData
 	3,  // 1: geocoder.v1.GetIpDataRequest.ips:type_name -> geocoder.v1.IpPayload
 	4,  // 2: geocoder.v1.GetIpDataResponse.items:type_name -> geocoder.v1.GeoIpData
 	7,  // 3: geocoder.v1.GetCountryNetworksResponse.items:type_name -> geocoder.v1.IsoCodeNetworks
-	12, // 4: geocoder.v1.GeocoderService.GetHealth:input_type -> google.protobuf.Empty
-	12, // 5: geocoder.v1.GeocoderService.GetCountries:input_type -> google.protobuf.Empty
+	14, // 4: geocoder.v1.GeocoderService.GetHealth:input_type -> google.protobuf.Empty
+	14, // 5: geocoder.v1.GeocoderService.GetCountries:input_type -> google.protobuf.Empty
 	5,  // 6: geocoder.v1.GeocoderService.GetIpData:input_type -> geocoder.v1.GetIpDataRequest
 	8,  // 7: geocoder.v1.GeocoderService.GetCountryNetworks:input_type -> geocoder.v1.GetCountryNetworksRequest
 	11, // 8: geocoder.v1.GeocoderService.GetCountryNetworksPaged:input_type -> geocoder.v1.GetCountryNetworksPagedRequest
-	0,  // 9: geocoder.v1.GeocoderService.GetHealth:output_type -> geocoder.v1.Health
-	2,  // 10: geocoder.v1.GeocoderService.GetCountries:output_type -> geocoder.v1.GetCountriesResponse
-	6,  // 11: geocoder.v1.GeocoderService.GetIpData:output_type -> geocoder.v1.GetIpDataResponse
-	9,  // 12: geocoder.v1.GeocoderService.GetCountryNetworks:output_type -> geocoder.v1.GetCountryNetworksResponse
-	10, // 13: geocoder.v1.GeocoderService.GetCountryNetworksPaged:output_type -> geocoder.v1.PageDataString
-	9,  // [9:14] is the sub-list for method output_type
-	4,  // [4:9] is the sub-list for method input_type
+	12, // 9: geocoder.v1.GeocoderService.GetCountryNetworksStream:input_type -> geocoder.v1.GetCountryNetworksStreamRequest
+	0,  // 10: geocoder.v1.GeocoderService.GetHealth:output_type -> geocoder.v1.Health
+	2,  // 11: geocoder.v1.GeocoderService.GetCountries:output_type -> geocoder.v1.GetCountriesResponse
+	6,  // 12: geocoder.v1.GeocoderService.GetIpData:output_type -> geocoder.v1.GetIpDataResponse
+	9,  // 13: geocoder.v1.GeocoderService.GetCountryNetworks:output_type -> geocoder.v1.GetCountryNetworksResponse
+	10, // 14: geocoder.v1.GeocoderService.GetCountryNetworksPaged:output_type -> geocoder.v1.PageDataString
+	13, // 15: geocoder.v1.GeocoderService.GetCountryNetworksStream:output_type -> geocoder.v1.CountryNetworksChunk
+	10, // [10:16] is the sub-list for method output_type
+	4,  // [4:10] is the sub-list for method input_type
 	4,  // [4:4] is the sub-list for extension type_name
 	4,  // [4:4] is the sub-list for extension extendee
 	0,  // [0:4] is the sub-list for field type_name
@@ -747,7 +891,7 @@ func file_geocoder_v1_geocoder_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_geocoder_v1_geocoder_proto_rawDesc), len(file_geocoder_v1_geocoder_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

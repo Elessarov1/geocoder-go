@@ -201,3 +201,65 @@ func (s *Server) GetCountryNetworksPaged(ctx context.Context, req *geocoderv1.Ge
 		Size:          int64(pd.Size),
 	}, nil
 }
+
+func (s *Server) GetCountryNetworksStream(
+	req *geocoderv1.GetCountryNetworksStreamRequest,
+	stream geocoderv1.GeocoderService_GetCountryNetworksStreamServer,
+) error {
+	ctx := stream.Context()
+
+	isoCodes := req.GetIsoCodes()
+	if len(isoCodes) == 0 {
+		return status.Error(codes.InvalidArgument, "iso_codes must not be empty")
+	}
+
+	chunkSize := int(req.GetChunkSize())
+	if chunkSize <= 0 {
+		chunkSize = 5000 // default
+	}
+	if chunkSize > 100000 {
+		chunkSize = 100000
+	}
+
+	for _, code := range isoCodes {
+		page := 0
+		for {
+			pd, err := s.api.GetCountryNetworksPaged(ctx, code, page, chunkSize)
+			if err != nil {
+				return toGRPCError(err)
+			}
+
+			nets := make([]string, len(pd.Content))
+			for i, p := range pd.Content {
+				nets[i] = p.String()
+			}
+
+			totalPages := pd.TotalPages
+			last := false
+
+			if totalPages <= 0 {
+				totalPages = 1
+			}
+			if page >= totalPages-1 {
+				last = true
+			}
+
+			if err := stream.Send(&geocoderv1.CountryNetworksChunk{
+				Code:       code,
+				Networks:   nets,
+				Page:       int32(page),
+				TotalPages: int32(totalPages),
+				Last:       last,
+			}); err != nil {
+				return err
+			}
+
+			if last {
+				break
+			}
+			page++
+		}
+	}
+
+	return nil
+}
