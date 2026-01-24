@@ -3,6 +3,7 @@ module github.com/Elessarov1/geocoder-go
 go 1.25
 
 require (
+	github.com/Elessarov1/service-kit v0.1.2
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/creasty/defaults v1.8.0
 	github.com/docker/go-units v0.5.0
@@ -51,6 +52,7 @@ require (
 	golang.org/x/tools v0.39.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251029180050-ab9386a59fda // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 tool github.com/ogen-go/ogen/cmd/ogen

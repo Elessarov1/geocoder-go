@@ -1,3 +1,9 @@
+# github.com/Elessarov1/service-kit v0.1.2
+## explicit; go 1.25
+github.com/Elessarov1/service-kit/component/server
+github.com/Elessarov1/service-kit/config
+github.com/Elessarov1/service-kit/core
+github.com/Elessarov1/service-kit/keys
 # github.com/beorn7/perks v1.0.1
 ## explicit; go 1.11
 github.com/beorn7/perks/quantile
@@ -334,3 +340,6 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v2 v2.4.0
 ## explicit; go 1.15
 gopkg.in/yaml.v2
+# gopkg.in/yaml.v3 v3.0.1
+## explicit
+gopkg.in/yaml.v3

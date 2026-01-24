@@ -3,12 +3,11 @@ package start
 import (
 	"context"
 	"fmt"
-	"os/signal"
 	"runtime"
-	"syscall"
 	"time"
 
 	"github.com/Elessarov1/geocoder-go/cmd"
+	"github.com/Elessarov1/geocoder-go/internal/bootstrap"
 	"github.com/Elessarov1/geocoder-go/internal/common/logger"
 	"github.com/Elessarov1/geocoder-go/internal/config"
 	"github.com/Elessarov1/geocoder-go/internal/geocoder_api"
@@ -21,6 +20,9 @@ import (
 	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+
+	kitserver "github.com/Elessarov1/service-kit/component/server"
+	kitcore "github.com/Elessarov1/service-kit/core"
 )
 
 type App struct {
@@ -50,7 +52,7 @@ func (app *App) before(ctx context.Context, _ *cli.Command) (context.Context, er
 }
 
 func (app *App) action(ctx context.Context, _ *cli.Command) error {
-	ctx, cancel := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
+	ctx, cancel := kitcore.SignalContext(ctx)
 	defer cancel()
 
 	cfg := app.cfg
@@ -90,11 +92,10 @@ func (app *App) action(ctx context.Context, _ *cli.Command) error {
 
 	api := geocoder_api.NewService(store, mmdb, time.Now())
 
-	srv, err := server.NewServer(ctx, &cfg.Server, api)
-	if err != nil {
-		return fmt.Errorf("failed to create geocoder http server: %w", err)
-	}
-	defer srv.Close()
+	// ===== service-kit =====
+
+	configPath := "config.yml"
+	reg := kitcore.NewRegistry(kitserver.Module(bootstrap.HTTPServerBootstrap(api)))
 
 	grpcSrv, err := grpc_server.New(ctx, &cfg.GRPC, api)
 	if err != nil {
@@ -102,17 +103,14 @@ func (app *App) action(ctx context.Context, _ *cli.Command) error {
 	}
 	defer grpcSrv.Close()
 
-	app.httpServer = srv
-
 	g, ctx := errgroup.WithContext(ctx)
-	g.Go(func() error { return srv.ListenAndServe(ctx) })
-	g.Go(func() error { return grpcSrv.Serve(ctx) })
 
+	// Run HTTP components via service-kit (reads YAML, starts, waits, stops).
 	g.Go(func() error {
-		<-ctx.Done()
-		log.Info("Stop signal received, gracefully shutting down", zap.Error(ctx.Err()))
-		return ctx.Err()
+		return kitcore.Run(ctx, configPath, reg, kitcore.WithStopTimeout(10*time.Second))
 	})
+
+	g.Go(func() error { return grpcSrv.Serve(ctx) })
 
 	if err := g.Wait(); err != nil {
 		if !errors.Is(err, context.Canceled) {

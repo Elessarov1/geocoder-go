@@ -1,3 +1,7 @@
+github.com/Elessarov1/service-kit v0.1.1 h1:+0no6ZP7O6L7lnjp2Vd07xZjVTvPfPQFQ1tiGwhM+BQ=
+github.com/Elessarov1/service-kit v0.1.1/go.mod h1:rfXavSLYQndrEnuGNHVI9ij8SCG96rGJDCzAIUfpcIg=
+github.com/Elessarov1/service-kit v0.1.2 h1:rK3HSzIGnv0AZ0/KYDg6+7qMxhGhcmfa74/RI8COLxc=
+github.com/Elessarov1/service-kit v0.1.2/go.mod h1:rfXavSLYQndrEnuGNHVI9ij8SCG96rGJDCzAIUfpcIg=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/caarlos0/env/v11 v11.3.1 h1:cArPWC15hWmEt+gWk7YBi7lEXTXCvpaSdCiZE2X5mCA=
