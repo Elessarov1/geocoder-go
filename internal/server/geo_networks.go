@@ -2,19 +2,20 @@ package server
 
 import (
 	"context"
+
 	"github.com/Elessarov1/geocoder-go/internal/server/oas"
 )
 
 // GET /geo/networks?isoCodes=RU&isoCodes=US
-func (s *GeoCoderServer) GetCountryNetworks(ctx context.Context, params oas.GetCountryNetworksParams) (oas.GetCountryNetworksRes, error) {
+func (h *GeoCoderHandler) GetCountryNetworks(ctx context.Context, params oas.GetCountryNetworksParams) (oas.GetCountryNetworksRes, error) {
 	isoCodes := make([]string, 0, len(params.IsoCodes))
 	for _, iso := range params.IsoCodes {
 		isoCodes = append(isoCodes, string(iso))
 	}
 
-	items, err := s.api.GetCountryNetworks(ctx, isoCodes)
+	items, err := h.api.GetCountryNetworks(ctx, isoCodes)
 	if err != nil {
-		return nil, s.toOASError(ctx, err)
+		return nil, h.toOASError(ctx, err)
 	}
 
 	out := make([]oas.IsoCodeNetworks, 0, len(items))
@@ -35,15 +36,15 @@ func (s *GeoCoderServer) GetCountryNetworks(ctx context.Context, params oas.GetC
 }
 
 // GET /geo/networks/paged?isoCode=RU&page=0&size=1000
-func (s *GeoCoderServer) GetCountryNetworksPaged(ctx context.Context, params oas.GetCountryNetworksPagedParams) (oas.GetCountryNetworksPagedRes, error) {
-	pageData, err := s.api.GetCountryNetworksPaged(
+func (h *GeoCoderHandler) GetCountryNetworksPaged(ctx context.Context, params oas.GetCountryNetworksPagedParams) (oas.GetCountryNetworksPagedRes, error) {
+	pageData, err := h.api.GetCountryNetworksPaged(
 		ctx,
 		string(params.IsoCode),
 		int(params.Page),
 		int(params.Size),
 	)
 	if err != nil {
-		return nil, s.toOASError(ctx, err)
+		return nil, h.toOASError(ctx, err)
 	}
 
 	content := make([]oas.Cidr, len(pageData.Content))

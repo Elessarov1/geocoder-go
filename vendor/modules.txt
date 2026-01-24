@@ -1,5 +1,6 @@
-# github.com/Elessarov1/service-kit v0.1.2
+# github.com/Elessarov1/service-kit v0.1.7
 ## explicit; go 1.25
+github.com/Elessarov1/service-kit/component/grpc
 github.com/Elessarov1/service-kit/component/server
 github.com/Elessarov1/service-kit/config
 github.com/Elessarov1/service-kit/core

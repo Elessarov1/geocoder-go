@@ -3,7 +3,7 @@ module github.com/Elessarov1/geocoder-go
 go 1.25
 
 require (
-	github.com/Elessarov1/service-kit v0.1.2
+	github.com/Elessarov1/service-kit v0.1.7
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/creasty/defaults v1.8.0
 	github.com/docker/go-units v0.5.0
@@ -13,7 +13,6 @@ require (
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/ogen-go/ogen v1.18.0
 	github.com/oschwald/maxminddb-golang v1.13.1
-	github.com/prometheus/client_golang v1.23.2
 	github.com/urfave/cli/v3 v3.6.1
 	go.uber.org/zap v1.27.1
 	golang.org/x/sync v0.19.0
@@ -36,6 +35,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect

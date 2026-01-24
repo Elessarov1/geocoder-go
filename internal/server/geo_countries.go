@@ -2,14 +2,15 @@ package server
 
 import (
 	"context"
+
 	"github.com/Elessarov1/geocoder-go/internal/server/oas"
 )
 
 // GET /geo/countries
-func (s *GeoCoderServer) GetCountries(ctx context.Context) (oas.GetCountriesRes, error) {
-	items, err := s.api.GetCountries(ctx)
+func (h *GeoCoderHandler) GetCountries(ctx context.Context) (oas.GetCountriesRes, error) {
+	items, err := h.api.GetCountries(ctx)
 	if err != nil {
-		return nil, s.toOASError(ctx, err)
+		return nil, h.toOASError(ctx, err)
 	}
 
 	out := make([]oas.CountryRangeData, 0, len(items))

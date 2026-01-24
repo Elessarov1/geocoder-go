@@ -12,7 +12,6 @@ import (
 	"github.com/Elessarov1/geocoder-go/internal/config"
 	"github.com/Elessarov1/geocoder-go/internal/geocoder_api"
 	"github.com/Elessarov1/geocoder-go/internal/geoip"
-	grpc_server "github.com/Elessarov1/geocoder-go/internal/gprc_server"
 	"github.com/Elessarov1/geocoder-go/internal/server"
 
 	"github.com/go-faster/errors"
@@ -27,7 +26,7 @@ import (
 type App struct {
 	cfg        config.Config
 	geoip      *geoip.Store
-	httpServer *server.GeoCoderServer
+	httpServer *server.GeoCoderHandler
 }
 
 func CmdStart() *cli.Command {
@@ -95,21 +94,12 @@ func (app *App) action(ctx context.Context, _ *cli.Command) error {
 
 	configPath := "config.yml"
 	reg := bootstrap.Registry(api)
-
-	grpcSrv, err := grpc_server.New(ctx, &cfg.GRPC, api)
-	if err != nil {
-		return fmt.Errorf("failed to create geocoder grpc server: %w", err)
-	}
-	defer grpcSrv.Close()
-
 	g, ctx := errgroup.WithContext(ctx)
 
 	// Run HTTP components via service-kit (reads YAML, starts, waits, stops).
 	g.Go(func() error {
 		return kitcore.Run(ctx, configPath, reg, kitcore.WithStopTimeout(10*time.Second))
 	})
-
-	g.Go(func() error { return grpcSrv.Serve(ctx) })
 
 	if err := g.Wait(); err != nil {
 		if !errors.Is(err, context.Canceled) {

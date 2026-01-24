@@ -3,7 +3,30 @@ server:
   depends_on: []
 
   host: ${GEOCODER_SERVER_HOST:0.0.0.0}
-  port: 8090
+  port: ${GEOCODER_SERVER_PORT:8090}
 
-  swagger: ${GEOCODER_SERVER_SWAGGER:false}
-  cors_enabled: ${GEOCODER_CORS_ENABLED:false}
+  shutdown_timeout: 10s
+
+  metrics:
+    enabled: true
+    path: /metrics
+
+  swagger:
+    enabled: true
+    yaml_path: /swagger.yaml
+    ui_path: /swagger-ui/
+
+  cors:
+    enabled: ${GEOCODER_CORS_ENABLED:false}
+
+grpc:
+  enabled: true
+  depends_on: [server]
+
+  host: ${GEOCODER_GRPC_HOST:127.0.0.1}
+  port: ${GEOCODER_GRPC_PORT:9090}
+
+  shutdown_timeout: 10s
+
+  reflection:
+    enabled: ${GEOCODER_GRPC_REFLECTION:true}

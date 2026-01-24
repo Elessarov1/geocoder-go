@@ -2,9 +2,10 @@ package server
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/Elessarov1/geocoder-go/internal/geocoder_api"
 	"github.com/Elessarov1/geocoder-go/internal/server/oas"
-	"net/http"
 
 	"github.com/go-faster/errors"
 	"go.uber.org/zap"
@@ -25,7 +26,7 @@ func ErrResponse(status int, code, desc string) *oas.DefaultErrorStatusCode {
 }
 
 // toOASError конвертит ошибки usecase-слоя в типизированную ogen-ошибку.
-func (s *GeoCoderServer) toOASError(_ context.Context, err error) *oas.DefaultErrorStatusCode {
+func (h *GeoCoderHandler) toOASError(_ context.Context, err error) *oas.DefaultErrorStatusCode {
 	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return ErrResponse(http.StatusInternalServerError, "internal.canceled", err.Error())
 	}
@@ -40,8 +41,8 @@ func (s *GeoCoderServer) toOASError(_ context.Context, err error) *oas.DefaultEr
 		return ErrResponse(http.StatusNotFound, "geo.not_found", nf.Error())
 	}
 
-	if s.lg != nil {
-		s.lg.Error("API error", zap.Error(err))
+	if h.lg != nil {
+		h.lg.Error("API error", zap.Error(err))
 	}
 
 	return ErrResponse(http.StatusInternalServerError, "internal.error", err.Error())

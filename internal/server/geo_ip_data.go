@@ -9,7 +9,7 @@ import (
 )
 
 // POST /geo/ip_data
-func (s *GeoCoderServer) GetIpData(ctx context.Context, req *oas.GeoPayload) (oas.GetIpDataRes, error) {
+func (h *GeoCoderHandler) GetIpData(ctx context.Context, req *oas.GeoPayload) (oas.GetIpDataRes, error) {
 	if req == nil {
 		return nil, ErrResponse(http.StatusBadRequest, "geo.bad_request", "request body is required")
 	}
@@ -26,9 +26,9 @@ func (s *GeoCoderServer) GetIpData(ctx context.Context, req *oas.GeoPayload) (oa
 		return nil, ErrResponse(http.StatusBadRequest, "geo.bad_request", "ips must not be empty")
 	}
 
-	items, err := s.api.GetIpData(ctx, ips)
+	items, err := h.api.GetIpData(ctx, ips)
 	if err != nil {
-		return nil, s.toOASError(ctx, err)
+		return nil, h.toOASError(ctx, err)
 	}
 
 	out := make([]oas.GeoIpData, 0, len(items))
