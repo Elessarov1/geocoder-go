@@ -21,7 +21,6 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
-	kitserver "github.com/Elessarov1/service-kit/component/server"
 	kitcore "github.com/Elessarov1/service-kit/core"
 )
 
@@ -95,7 +94,7 @@ func (app *App) action(ctx context.Context, _ *cli.Command) error {
 	// ===== service-kit =====
 
 	configPath := "config.yml"
-	reg := kitcore.NewRegistry(kitserver.Module(bootstrap.HTTPServerBootstrap(api)))
+	reg := bootstrap.Registry(api)
 
 	grpcSrv, err := grpc_server.New(ctx, &cfg.GRPC, api)
 	if err != nil {

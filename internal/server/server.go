@@ -3,12 +3,14 @@ package server
 import (
 	"context"
 	"fmt"
+
 	"github.com/Elessarov1/geocoder-go"
 	"github.com/Elessarov1/geocoder-go/internal/common/logger"
-	"github.com/Elessarov1/geocoder-go/internal/config"
 	"github.com/Elessarov1/geocoder-go/internal/geocoder_api"
 	"github.com/Elessarov1/geocoder-go/internal/server/middleware"
 	"github.com/Elessarov1/geocoder-go/internal/server/oas"
+	"github.com/Elessarov1/service-kit/component/server"
+
 	"io/fs"
 	"net"
 	"net/http"
@@ -33,7 +35,7 @@ type GeoCoderServer struct {
 
 var _ oas.Handler = (*GeoCoderServer)(nil) // static check
 
-func NewServer(ctx context.Context, cfg *config.ServerConfig, api *geocoder_api.Service) (*GeoCoderServer, error) {
+func NewServer(ctx context.Context, cfg *server.Config, api *geocoder_api.Service) (*GeoCoderServer, error) {
 	lg := logger.FromContext(ctx).Named("server")
 
 	s := &GeoCoderServer{
@@ -109,7 +111,7 @@ func (s *GeoCoderServer) Close() {
 	s.lg.Info("HTTP server closed")
 }
 
-func (s *GeoCoderServer) NewError(ctx context.Context, err error) *oas.DefaultErrorStatusCode {
+func (s *GeoCoderServer) NewError(_ context.Context, err error) *oas.DefaultErrorStatusCode {
 	s.lg.Error("API request error", zap.Error(err))
 	return ErrResponse(http.StatusInternalServerError, "internal.error", err.Error())
 }
